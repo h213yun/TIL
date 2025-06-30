@@ -1,32 +1,42 @@
-import feedparser, datetime
+import feedparser
+import datetime
 import ssl
+import re
 
-# SSL 인증서 검증 무시
 ssl._create_default_https_context = ssl._create_unverified_context
 
-tistory_uri="https://zoo-tech.tistory.com/" 
-feed = feedparser.parse(tistory_uri+"/rss")
+RSS_URL = "https://zoo-tech.tistory.com/rss"
+BLOG_SECTION_START = "<!-- BLOG-START -->"
+BLOG_SECTION_END = "<!-- BLOG-END -->"
+README_PATH = "README.md"
 
-markdown_text = """
-### Hi there 👋  
+def get_latest_blog_posts(max_posts=3):
+    feed = feedparser.parse(RSS_URL)
+    posts = []
+    for entry in feed.entries[:max_posts]:
+        title = entry.title
+        link = entry.link
+        posts.append(f"<a href=\"{link}\">{title}</a> <br>")
+    return "\n".join(posts)
 
+def update_readme():
+    with open(README_PATH, "r", encoding="utf-8") as f:
+        content = f.read()
 
-### ✏️ My Latest Blog Posts
+    new_blog_content = get_latest_blog_posts()
+    new_section = f"{BLOG_SECTION_START}\n{new_blog_content}\n{BLOG_SECTION_END}"
 
-""" # list of blog posts will be appended here
+    updated_content = re.sub(
+        f"{BLOG_SECTION_START}.*?{BLOG_SECTION_END}",
+        new_section,
+        content,
+        flags=re.DOTALL
+    )
 
-lst = []
+    with open(README_PATH, "w", encoding="utf-8") as f:
+        f.write(updated_content)
 
+    print("README.md 업데이트 완료")
 
-for i in feed['entries'][:3]:
-#     dt = datetime.datetime.strptime(i['published'], "%a, %d %b %Y %H:%M:%S %z").strftime("%b %d, %Y")
-#     markdown_text += f"[{i['title']}]({i['link']}) - {dt}<br>\n"
-#     markdown_text += f"{i['title']} {i['link']} <br>\n"
-    markdown_text += f"<a href =\"{i['link']}\"> {i['title']} </a> <br>"
-
-
-    print(i['link'], i['title'])
-
-f = open("README.md",mode="w", encoding="utf-8")
-f.write(markdown_text)
-f.close()
+if __name__ == "__main__":
+    update_readme()

@@ -22,7 +22,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - name: Set up Python 3.12.2
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.12.2"
       - name: Install dependencies
@@ -40,5 +40,5 @@ jobs:
           git diff
           git config --local user.email "rhyunju31@gmail.com"
           git config --local user.name "h213yun"
-          git commit -m "Docs: Update README.md"
+          git commit -m "Docs: Update README.md" || echo "No changes to commit"
           git push
