@@ -16,7 +16,12 @@ def get_latest_blog_posts(max_posts=3):
     for entry in feed.entries[:max_posts]:
         title = entry.title
         link = entry.link
-        posts.append(f"<a href=\"{link}\">{title}</a> <br>")
+        try:
+            dt = datetime.datetime(*entry.published_parsed[:6])
+            formatted_date = dt.strftime("%Y-%m-%d")
+            posts.append(f"- <a href=\"{link}\">{title}</a> ({formatted_date})")
+        except Exception as e:
+            posts.append(f"- <a href=\"{link}\">{title}</a>")  
     return "\n".join(posts)
 
 def update_readme():
